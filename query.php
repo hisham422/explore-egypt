@@ -1,0 +1,1 @@
+<?php require 'vendor/autoload.php'; \ = require_once 'bootstrap/app.php'; \ = \->make(Illuminate\Contracts\Console\Kernel::class); \->bootstrap(); \ = DB::table('attraction_images')->where('type', 'video')->orWhere('image', 'like', '%.mp4')->get(); print_r(\);
