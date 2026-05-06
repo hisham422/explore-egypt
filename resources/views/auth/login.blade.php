@@ -1,5 +1,5 @@
 <x-tourism-layout title="Explore Egypt | Login">
-    <section class="auth-shell">
+    <section class="auth-shell auth-page">
         <div class="auth-card">
             <h1>Welcome back</h1>
             <p>Log in to manage your favorites and profile.</p>
@@ -12,16 +12,16 @@
                 @csrf
 
                 <div class="field">
-                    <label for="email">Email</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username">
+                    <x-input-label for="email" value="Email" />
+                    <x-text-input id="email" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
                     @error('email')
                         <p class="error-text">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div class="field">
-                    <label for="password">Password</label>
-                    <input id="password" type="password" name="password" required autocomplete="current-password">
+                    <x-input-label for="password" value="Password" />
+                    <x-text-input id="password" type="password" name="password" required autocomplete="current-password" />
                     @error('password')
                         <p class="error-text">{{ $message }}</p>
                     @enderror

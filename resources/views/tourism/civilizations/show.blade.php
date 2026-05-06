@@ -1,18 +1,39 @@
 <x-tourism-layout title="Explore Egypt | {{ $civilization->name }}">
     <section class="section-block page-top">
         <div class="container">
-            <article class="detail-card civilization-detail-card">
-                <div class="detail-hero-wrap">
-                    <x-image-frame class="detail-hero" :src="$civilization->image" :alt="$civilization->name" :label="$civilization->name" placeholder-size="1400x620" object-fit="cover" />
+            <section
+                class="civilization-hero detail-card civilization-detail-card"
+                x-data="{ playing: true, toggle() { const video = this.$refs.heroVideo; if (!video) return; if (video.paused) { video.play(); this.playing = true; } else { video.pause(); this.playing = false; } } }"
+            >
+                <div class="civilization-hero-media">
+                    <video
+                        class="civilization-hero-video"
+                        x-ref="heroVideo"
+                        autoplay
+                        muted
+                        loop
+                        playsinline
+                        preload="metadata"
+                        poster="{{ $civilization->image ? $civilization->imageUrl('1400x620') : '' }}"
+                    >
+                        <source src="{{ $heroVideoUrl }}">
+                    </video>
+
+                    {{-- Fallback image removed to prefer video display in hero --}}
+
+                    <div class="civilization-hero-overlay"></div>
                 </div>
-                <div class="detail-body civilization-detail-body">
-                    <div class="detail-header civilization-detail-header">
-                        <span class="category-badge category-badge--civilization">Civilization</span>
-                        <h1>{{ $civilization->name }}</h1>
-                        <p class="detail-description">{{ $civilization->description ?: 'Discover the history, culture, and attractions connected to this civilization.' }}</p>
-                    </div>
+
+                <div class="civilization-hero-content">
+                    <span class="category-badge category-badge--civilization">Civilization</span>
+                    <h1>{{ $civilization->name }}</h1>
+                    <p>{{ $civilization->description ?: 'Discover the history, culture, and attractions connected to this civilization.' }}</p>
                 </div>
-            </article>
+            </section>
+
+            <div id="civilization-timeline">
+                <x-civilization-timeline :civilization="$civilization" />
+            </div>
 
             <section class="civilization-attractions-section">
                 <div class="section-head section-head-stack">

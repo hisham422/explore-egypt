@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ReviewController as ApiReviewController;
 use App\Http\Controllers\Admin\AttractionController as AdminAttractionController;
 use App\Http\Controllers\Admin\AppearanceController as AdminAppearanceController;
 use App\Http\Controllers\Admin\CivilizationController as AdminCivilizationController;
+use App\Http\Controllers\Admin\CivilizationPeriodController as AdminCivilizationPeriodController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\RegionController as AdminRegionController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
@@ -65,6 +66,18 @@ Route::middleware(['auth', 'verified', 'admin'])
         Route::put('/appearance', [AdminAppearanceController::class, 'update'])->name('appearance.update');
 
         Route::resource('civilizations', AdminCivilizationController::class)->except(['show']);
+        Route::resource('civilization-periods', AdminCivilizationPeriodController::class)
+            ->parameters(['civilization-periods' => 'period'])
+            ->except(['show']);
+        
+        // Period Attractions Management
+        Route::get('periods/{period}/attractions', [AdminCivilizationPeriodController::class, 'attractions'])
+            ->name('period-attractions.index');
+        Route::post('periods/{period}/attractions', [AdminCivilizationPeriodController::class, 'attachAttraction'])
+            ->name('period-attractions.store');
+        Route::delete('periods/{period}/attractions/{attraction}', [AdminCivilizationPeriodController::class, 'detachAttraction'])
+            ->name('period-attractions.destroy');
+        
         Route::resource('regions', AdminRegionController::class)->except(['show']);
         Route::post('attractions/{attraction}/images/reorder', [AdminAttractionController::class, 'reorderImages'])
             ->name('attractions.images.reorder');

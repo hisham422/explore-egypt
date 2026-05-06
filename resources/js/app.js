@@ -1,6 +1,8 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
+import './scroll-animations';
+import './theme-switcher';
 
 window.Alpine = Alpine;
 
@@ -1352,6 +1354,37 @@ function initHomePageEffects() {
 	}
 
 	const revealItems = Array.from(homeRoot.querySelectorAll('.section-block .card-link, .section-block .section-head'));
+	const heroBanner = homeRoot.querySelector('.hero-banner');
+	const progressBar = homeRoot.querySelector('[data-hero-progress-bar]');
+
+	if (heroBanner && progressBar) {
+		let ticking = false;
+
+		const updateHeroProgress = () => {
+			const rect = heroBanner.getBoundingClientRect();
+			const consumed = Math.min(Math.max(-rect.top, 0), rect.height);
+			const ratio = rect.height > 0 ? consumed / rect.height : 0;
+			const progressPercent = `${Math.round(ratio * 100)}%`;
+
+			progressBar.style.setProperty('--hero-scroll-progress', progressPercent);
+			progressBar.style.width = progressPercent;
+			homeRoot.classList.toggle('is-hero-past', ratio > 0.9);
+			ticking = false;
+		};
+
+		const onScroll = () => {
+			if (ticking) {
+				return;
+			}
+
+			ticking = true;
+			window.requestAnimationFrame(updateHeroProgress);
+		};
+
+		updateHeroProgress();
+		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('resize', onScroll);
+	}
 
 	if (!revealItems.length) {
 		return;

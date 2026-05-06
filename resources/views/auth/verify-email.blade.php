@@ -1,11 +1,11 @@
 <x-tourism-layout title="Explore Egypt | Verify Email">
-    <section class="auth-shell">
+    <section class="auth-shell auth-page">
         <div class="auth-card">
             <h1>Verify your email</h1>
             <p>Check your inbox and click the verification link before continuing.</p>
 
             @if (session('status') == 'verification-link-sent')
-                <p class="meta">A new verification link has been sent.</p>
+                <x-auth-session-status class="meta" :status="'A new verification link has been sent.'" />
             @endif
 
             <div class="auth-actions">

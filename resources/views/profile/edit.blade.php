@@ -1,5 +1,5 @@
 <x-tourism-layout title="Explore Egypt | Profile">
-    <section class="profile-layout">
+    <section class="profile-layout profile-page" data-scroll-animate="fade-up" data-scroll-duration="0.75s">
         <div class="container profile-grid">
             <aside class="profile-sidebar-card">
                 <div class="profile-summary">

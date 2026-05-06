@@ -15,10 +15,16 @@ class Civilization extends Model
         'name',
         'description',
         'image',
+        'hero_video_url',
     ];
 
     public function attractions(): HasMany
     {
         return $this->hasMany(Attraction::class);
+    }
+
+    public function periods(): HasMany
+    {
+        return $this->hasMany(CivilizationPeriod::class)->orderBy('start_year');
     }
 }

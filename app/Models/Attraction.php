@@ -18,9 +18,28 @@ class Attraction extends Model
         'name',
         'description',
         'image',
+        'type',
         'location',
+        'lat',
+        'lng',
         'civilization_id',
+        'civilization_period_id',
         'region_id',
+    ];
+
+    protected $casts = [
+        'lat' => 'float',
+        'lng' => 'float',
+    ];
+
+    public const TYPE_HISTORICAL = 'historical';
+    public const TYPE_BEACH = 'beach';
+    public const TYPE_COASTAL = 'coastal';
+
+    public const TYPES = [
+        self::TYPE_HISTORICAL,
+        self::TYPE_BEACH,
+        self::TYPE_COASTAL,
     ];
 
     // 🔥 rename عشان consistency
@@ -29,6 +48,11 @@ class Attraction extends Model
     public function civilization(): BelongsTo
     {
         return $this->belongsTo(Civilization::class);
+    }
+
+    public function period(): BelongsTo
+    {
+        return $this->belongsTo(CivilizationPeriod::class, 'civilization_period_id');
     }
 
     public function region(): BelongsTo
@@ -60,7 +84,7 @@ class Attraction extends Model
     public function scopeApiBase(Builder $query): Builder
     {
         return $query
-            ->with(['civilization', 'region'])
+            ->with(['civilization', 'period', 'region'])
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
             ->withCount('favorites')
@@ -86,6 +110,21 @@ class Attraction extends Model
         ])->withMax([
             'favorites as current_favorite_id' => fn ($q) => $q->where('user_id', $userId),
         ], 'id');
+    }
+
+    public function scopeHistorical(Builder $query): Builder
+    {
+        return $query->where('type', self::TYPE_HISTORICAL);
+    }
+
+    public function scopeBeaches(Builder $query): Builder
+    {
+        return $query->where('type', self::TYPE_BEACH);
+    }
+
+    public function scopeCoastal(Builder $query): Builder
+    {
+        return $query->where('type', self::TYPE_COASTAL);
     }
 
     // 🔥 cleaner accessor

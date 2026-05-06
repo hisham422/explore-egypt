@@ -1,5 +1,5 @@
 <x-tourism-layout title="Explore Egypt | Confirm Password">
-    <section class="auth-shell">
+    <section class="auth-shell auth-page">
         <div class="auth-card">
             <h1>Confirm your password</h1>
             <p>For security, re-enter your password to continue.</p>
@@ -8,8 +8,8 @@
                 @csrf
 
                 <div class="field">
-                    <label for="password">Password</label>
-                    <input id="password" type="password" name="password" required autocomplete="current-password">
+                    <x-input-label for="password" value="Password" />
+                    <x-text-input id="password" type="password" name="password" required autocomplete="current-password" />
                     @error('password')
                         <p class="error-text">{{ $message }}</p>
                     @enderror

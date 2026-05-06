@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Attraction;
 use App\Models\AttractionImage;
 use App\Models\Civilization;
+use App\Models\CivilizationPeriod;
 use App\Models\Region;
 use App\Support\ImageManager;
 use Illuminate\Contracts\View\View;
@@ -13,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class AttractionController extends Controller
 {
@@ -41,6 +43,7 @@ class AttractionController extends Controller
         return view('admin.attractions.create', [
             'attraction' => new Attraction(),
             'civilizations' => Civilization::orderBy('name')->get(['id', 'name']),
+            'periods' => CivilizationPeriod::with('civilization')->orderBy('civilization_id')->orderBy('sort_order')->get(),
             'regions' => Region::orderBy('name')->get(['id', 'name']),
         ]);
     }
@@ -67,6 +70,7 @@ class AttractionController extends Controller
         return view('admin.attractions.edit', [
             'attraction' => $attraction,
             'civilizations' => Civilization::orderBy('name')->get(['id', 'name']),
+            'periods' => CivilizationPeriod::with('civilization')->orderBy('civilization_id')->orderBy('sort_order')->get(),
             'regions' => Region::orderBy('name')->get(['id', 'name']),
         ]);
     }
@@ -203,6 +207,7 @@ class AttractionController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
+            'type' => ['required', Rule::in(Attraction::TYPES)],
             'image' => ['nullable'],
             // accept both names to be tolerant of different forms
             'images' => ['nullable', 'array'],
@@ -210,7 +215,13 @@ class AttractionController extends Controller
             'media' => ['nullable', 'array'],
             'media.*' => ['file', 'mimes:jpg,jpeg,png,webp,mp4', 'max:10240'],
             'location' => ['nullable', 'string', 'max:255'],
+            'lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'lng' => ['nullable', 'numeric', 'between:-180,180'],
             'civilization_id' => ['required', 'exists:civilizations,id'],
+            'civilization_period_id' => [
+                'nullable',
+                Rule::exists('civilization_periods', 'id')->where(fn ($query) => $query->where('civilization_id', $request->integer('civilization_id'))),
+            ],
             'region_id' => ['required', 'exists:regions,id'],
         ]);
     }

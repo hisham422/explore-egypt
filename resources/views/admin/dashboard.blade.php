@@ -30,13 +30,13 @@
 
     <div class="admin-grid" style="grid-template-columns:1fr 1fr;">
         <section class="admin-card">
-            <h2 style="margin:0 0 10px;color:#1f3d63;font-size:1.05rem;">Recent Reviews</h2>
+            <h2 class="admin-section-title">Recent Reviews</h2>
             @if($recentReviews->isEmpty())
-                <p class="admin-help" style="margin:0;">No reviews yet.</p>
+                <p class="admin-help admin-empty">No reviews yet.</p>
             @else
-                <ul style="margin:0;padding-left:18px;display:grid;gap:8px;">
+                <ul class="admin-list">
                     @foreach($recentReviews as $review)
-                        <li style="font-size:0.9rem;line-height:1.45;">
+                        <li>
                             <strong>{{ $review->user?->name ?? 'User' }}</strong>
                             rated
                             <strong>{{ $review->attraction?->name ?? 'Attraction' }}</strong>
@@ -48,13 +48,13 @@
         </section>
 
         <section class="admin-card">
-            <h2 style="margin:0 0 10px;color:#1f3d63;font-size:1.05rem;">Recent Users</h2>
+            <h2 class="admin-section-title">Recent Users</h2>
             @if($recentUsers->isEmpty())
-                <p class="admin-help" style="margin:0;">No users yet.</p>
+                <p class="admin-help admin-empty">No users yet.</p>
             @else
-                <ul style="margin:0;padding-left:18px;display:grid;gap:8px;">
+                <ul class="admin-list">
                     @foreach($recentUsers as $user)
-                        <li style="font-size:0.9rem;line-height:1.45;">
+                        <li>
                             <strong>{{ $user->name }}</strong>
                             <span class="admin-help">({{ $user->email }})</span>
                         </li>

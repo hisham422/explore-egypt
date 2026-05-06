@@ -9,8 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/map.css'])
+    @stack('styles')
 </head>
-<body class="tourism-body">
+<body class="tourism-body light">
 <header id="top" class="site-header" x-data="tourismNavigation()" x-init="init()" @keydown.escape.window="closeMenus()" @resize.window="handleResize()">
     <div class="container site-header__inner">
         <a href="{{ route('home') }}" class="site-brand" aria-label="Explore Egypt home">
@@ -40,6 +42,18 @@
                 >
                 <button type="submit" class="site-search__button" aria-label="Submit search">Search</button>
             </form>
+
+            <button
+                type="button"
+                class="theme-toggle"
+                x-data="themeToggle()"
+                x-init="init()"
+                @click="toggle()"
+                :aria-label="getLabel()"
+                :title="getLabel()"
+            >
+                <span x-text="getIcon()"></span>
+            </button>
 
             @auth
                 <div class="site-user" x-ref="userMenu">
@@ -75,9 +89,6 @@
             @else
                 <div class="site-auth-actions">
                     <a href="{{ route('login') }}" class="btn btn-outline site-login-link">Log in</a>
-                    @if(Route::has('register'))
-                        <a href="{{ route('register') }}" class="btn btn-primary site-join-link">Join free</a>
-                    @endif
                 </div>
             @endauth
 
@@ -185,5 +196,6 @@
         <a href="#top" class="site-footer__top">Back to top</a>
     </div>
 </footer>
+@stack('scripts')
 </body>
 </html>

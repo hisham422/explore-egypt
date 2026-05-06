@@ -1,5 +1,5 @@
 <x-tourism-layout title="Explore Egypt | Forgot Password">
-    <section class="auth-shell">
+    <section class="auth-shell auth-page">
         <div class="auth-card">
             <h1>Reset your password</h1>
             <p>Enter your email and we will send a secure reset link.</p>
@@ -12,8 +12,8 @@
                 @csrf
 
                 <div class="field">
-                    <label for="email">Email</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus>
+                    <x-input-label for="email" value="Email" />
+                    <x-text-input id="email" type="email" name="email" :value="old('email')" required autofocus />
                     @error('email')
                         <p class="error-text">{{ $message }}</p>
                     @enderror

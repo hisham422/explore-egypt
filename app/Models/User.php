@@ -69,13 +69,13 @@ class User extends Authenticatable
     }
 
     public function favoriteAttractions(): BelongsToMany
-{
-    return $this->belongsToMany(Attraction::class, 'favorites')
-        ->withTimestamps();
-}
+    {
+        return $this->belongsToMany(Attraction::class, 'favorites')
+            ->withTimestamps();
+    }
 
-        public function avatarUrl(string $placeholderSize = '320x320'): string
-        {
-            return ImageManager::publicUrl($this->avatar, $this->name ?: 'User avatar', $placeholderSize);
-        }
+    public function avatarUrl(string $placeholderSize = '320x320'): string
+    {
+        return ImageManager::publicUrl($this->avatar, $this->name ?: 'User avatar', $placeholderSize);
+    }
 }

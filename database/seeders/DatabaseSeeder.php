@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
             CivilizationSeeder::class,
             RegionSeeder::class,
             AttractionSeeder::class,
+            AttractionCoordinatesSeeder::class,
+            CivilizationPeriodSeeder::class,
+            CivilizationPeriodAttractionSeeder::class,
             AdminUserSeeder::class,
         ]);
 

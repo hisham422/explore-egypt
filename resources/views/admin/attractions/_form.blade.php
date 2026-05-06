@@ -1,6 +1,32 @@
 @csrf
 
-<div class="admin-form-grid">
+@php
+    $periodOptionsByCivilization = $periods
+        ->groupBy(fn ($period) => (string) $period->civilization_id)
+        ->map(fn ($periodGroup) => $periodGroup->values()->map(function ($period) {
+            return [
+                'id' => (string) $period->id,
+                'title' => $period->title,
+                'label' => $period->title.' ('.$period->formatted_year_range.')',
+            ];
+        }));
+@endphp
+
+<div
+    class="admin-form-grid"
+    x-data="{
+        civilizationId: @js((string) old('civilization_id', $attraction->civilization_id)),
+        periodId: @js((string) old('civilization_period_id', $attraction->civilization_period_id)),
+        periodOptionsByCivilization: @js($periodOptionsByCivilization),
+        get availablePeriods() {
+            return this.periodOptionsByCivilization[this.civilizationId] || [];
+        },
+        get periodStillValid() {
+            return this.availablePeriods.some(period => period.id === this.periodId);
+        },
+    }"
+    x-effect="if (civilizationId && !periodStillValid) periodId = ''"
+>
     <div class="admin-field">
         <label for="name">Name</label>
         <input id="name" type="text" name="name" value="{{ old('name', $attraction->name) }}" required>
@@ -14,8 +40,18 @@
     </div>
 
     <div class="admin-field">
+        <label for="type">Attraction Type</label>
+        <select id="type" name="type" required>
+            <option value="historical" @selected(old('type', $attraction->type ?: 'historical') === 'historical')>Historical</option>
+            <option value="beach" @selected(old('type', $attraction->type) === 'beach')>Beach</option>
+            <option value="coastal" @selected(old('type', $attraction->type) === 'coastal')>Coastal City</option>
+        </select>
+        @error('type')<p class="admin-error">{{ $message }}</p>@enderror
+    </div>
+
+    <div class="admin-field">
         <label for="civilization_id">Civilization</label>
-        <select id="civilization_id" name="civilization_id" required>
+        <select id="civilization_id" name="civilization_id" required x-model="civilizationId">
             <option value="">Select civilization</option>
             @foreach($civilizations as $civilization)
                 <option value="{{ $civilization->id }}" @selected((int) old('civilization_id', $attraction->civilization_id) === (int) $civilization->id)>
@@ -40,6 +76,20 @@
     </div>
 
     <div class="admin-field full">
+        <label for="civilization_period_id">Historical Period</label>
+        <select id="civilization_period_id" name="civilization_period_id" x-model="periodId">
+            <option value="">Optional - link to a timeline period</option>
+            <template x-for="period in availablePeriods" :key="period.id">
+                <option :value="period.id" x-text="period.label"></option>
+            </template>
+        </select>
+        <p class="admin-help" style="margin:6px 0 0;">Optional. Use this to connect the attraction to a specific historical period shown in the timeline.</p>
+        <p class="admin-help" style="margin:6px 0 0;" x-show="civilizationId && availablePeriods.length === 0" x-cloak>No historical periods are available yet for the selected civilization.</p>
+        @error('civilization_period_id')<p class="admin-error">{{ $message }}</p>@enderror
+    </div>
+
+    <div class="admin-field full">
+        <p class="admin-help" style="margin:0 0 10px;">Coordinates are required so the attraction can appear on the interactive map.</p>
         @include('admin.components.image-upload', [
             'name' => 'image',
             'label' => 'Image',
@@ -82,7 +132,7 @@
     @if($attraction->exists && $attraction->images->isNotEmpty())
         <div class="admin-field full">
             <label>Current Gallery</label>
-            <p class="admin-help" style="margin:0 0 10px;">Drag items to reorder the gallery, then drop to save. Images show thumbnails, videos show play icon.</p>
+            <p class="admin-help admin-gallery-help">Drag items to reorder the gallery, then drop to save. Images show thumbnails, videos show play icon.</p>
             <div
                 class="attraction-gallery-admin"
                 data-attraction-gallery-admin
@@ -95,21 +145,21 @@
                         draggable="true"
                         data-gallery-item
                         data-gallery-id="{{ $galleryItem->id }}"
-                        style="border:1px solid #d8e0ec;border-radius:12px;padding:8px;background:#fff;cursor:grab;"
+                        style="cursor:grab;"
                     >
                         @if($galleryItem->isVideo())
-                            <div style="width:100%;height:92px;background:#000;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;position:relative;">
-                                <svg style="width:32px;height:32px;color:#fff;" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            <div class="attraction-gallery-admin__media attraction-gallery-admin__media--video">
+                                <svg class="attraction-gallery-admin__icon" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                             </div>
                         @else
                             <img
                                 src="{{ $galleryItem->imageUrl('320x220') }}"
                                 alt="{{ $attraction->name }} gallery image"
-                                style="width:100%;height:92px;object-fit:cover;border-radius:8px;display:block;margin-bottom:8px;"
+                                class="attraction-gallery-admin__image"
                                 loading="lazy"
                             >
                         @endif
-                        <p class="admin-help" style="margin:0 0 4px;">{{ $galleryItem->type === 'video' ? '🎥 Video' : '🖼️ Image' }} #{{ $index + 1 }}</p>
+                        <p class="admin-help admin-gallery-caption">{{ $galleryItem->type === 'video' ? '🎥 Video' : '🖼️ Image' }} #{{ $index + 1 }}</p>
                         <button
                             type="button"
                             class="admin-btn admin-btn-danger"

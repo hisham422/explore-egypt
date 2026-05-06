@@ -30,6 +30,11 @@ class CivilizationSeeder extends Seeder
                 'description' => 'Classical influences in architecture, theaters, and archaeological sites.',
                 'image' => 'civilizations/greco-roman.jpg',
             ],
+            [
+                'name' => 'Modern Civilization',
+                'description' => 'Contemporary Egypt shaped by modern architecture, urban culture, technological growth, and national development.',
+                'image' => 'images/civilizations/modern-civilization.png',
+            ],
         ];
 
         foreach ($items as $item) {

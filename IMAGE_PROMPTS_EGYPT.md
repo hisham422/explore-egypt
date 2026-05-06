@@ -22,6 +22,7 @@ Prompt:
 A breathtaking wide-angle view of Egypt featuring the pyramids, Nile river, and desert landscape during golden sunset, cinematic lighting, ultra realistic, professional travel photography, 4k, atmospheric depth, natural shadows, rich texture detail, clean composition
 
 Suggested Params:
+
 - Aspect ratio: 16:9
 - Lens look: 24mm wide-angle
 - Time: golden hour
@@ -31,18 +32,22 @@ Suggested Params:
 ## 2) Civilizations
 
 ### 2.1 Ancient Egyptian Civilization
+
 Prompt:
 Ancient Egyptian civilization scene with pyramids, statues of pharaohs, hieroglyph-covered stone walls, desert atmosphere, warm golden lighting, ultra realistic, travel photography, 4k, high detail textures, authentic archaeological mood
 
 Suggested Params:
+
 - Aspect ratio: 3:2
 - Lens look: 35mm
 
 ### 2.2 Islamic Cairo Architecture
+
 Prompt:
 Islamic Cairo architecture with historic mosques, domes, and minarets under a sunset sky, detailed stone textures, authentic city atmosphere, ultra realistic photography, cinematic framing, 4k
 
 Suggested Params:
+
 - Aspect ratio: 3:2
 - Lens look: 35mm
 
@@ -51,26 +56,32 @@ Suggested Params:
 ## 3) Regions (Cities)
 
 ### 3.1 Cairo Skyline at Night
+
 Prompt:
 Cairo skyline with Nile river at night, city lights reflecting on water, mix of modern and historic buildings, ultra realistic, professional travel photography, 4k, crisp details, balanced contrast
 
 Suggested Params:
+
 - Aspect ratio: 16:9
 - Lens look: 28mm
 
 ### 3.2 Luxor Region
+
 Prompt:
 Luxor temples and ruins under bright sunlight, clear blue sky, high detail stone textures, realistic shadows, ultra realistic travel photography, 4k
 
 Suggested Params:
+
 - Aspect ratio: 3:2
 - Lens look: 24-35mm
 
 ### 3.3 Aswan Region
+
 Prompt:
 Aswan Nile river with traditional boats and palm trees during sunset, peaceful atmosphere, warm natural light, ultra realistic travel photography, 4k, clean composition
 
 Suggested Params:
+
 - Aspect ratio: 16:9
 - Lens look: 35mm
 
@@ -79,22 +90,27 @@ Suggested Params:
 ## 4) Attractions
 
 ### 4.1 Pyramids of Giza
+
 Prompt:
 Pyramids of Giza close-up with dramatic sky at golden sunset, ultra realistic, sharp details, travel photography, 4k, cinematic perspective
 
 ### 4.2 Luxor Temple Night
+
 Prompt:
 Luxor Temple illuminated at night, warm architectural lighting, detailed carvings and columns, ultra realistic photography, 4k, high clarity
 
 ### 4.3 Karnak Temple
+
 Prompt:
 Karnak Temple massive columns, wide-angle composition, bright daylight, high detail, realistic shadows, ultra realistic travel photography, 4k
 
 ### 4.4 Abu Simbel
+
 Prompt:
 Abu Simbel temple statues carved in rock, dramatic directional lighting, ultra realistic, rich stone textures, professional travel photography, 4k
 
 Suggested Params for Attractions:
+
 - Aspect ratio: 3:2 (cards) or 16:9 (hero/banner)
 - Lens look: 24-35mm
 
@@ -103,14 +119,17 @@ Suggested Params for Attractions:
 ## 5) Gallery Detail Shots
 
 ### 5.1 Hieroglyph Close-Up
+
 Prompt:
 Close-up shot of ancient Egyptian hieroglyphs carved in stone, detailed textures, warm lighting, shallow depth of field, ultra realistic macro travel photography, 4k
 
 ### 5.2 Temple Interior Atmosphere
+
 Prompt:
 Interior of an ancient temple with large stone columns and sunlight rays entering from above, cinematic atmosphere, dust particles in light beams, ultra realistic photography, 4k
 
 Suggested Params:
+
 - Aspect ratio: 4:3 or 3:2
 - Lens look: 50mm for detail, 24mm for interior wide
 
@@ -119,14 +138,17 @@ Suggested Params:
 ## 6) UI-Oriented Variants (Ready for Web)
 
 ### Card Variant Prompt Suffix
+
 Append this to any base prompt for listing cards:
 clean centered composition, subject dominant, negative space for UI, no cluttered foreground, website card friendly
 
 ### Hero Variant Prompt Suffix
+
 Append this to any base prompt for hero banners:
 cinematic panoramic framing, broad depth layers, soft atmospheric haze, premium editorial travel style
 
 ### Gallery Variant Prompt Suffix
+
 Append this to any base prompt for lightbox/gallery:
 textural close detail, dramatic natural light gradients, immersive perspective, high micro-contrast
 
