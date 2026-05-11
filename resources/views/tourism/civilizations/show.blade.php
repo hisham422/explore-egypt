@@ -14,9 +14,9 @@
                         loop
                         playsinline
                         preload="metadata"
-                        poster="{{ $civilization->image ? $civilization->imageUrl('1400x620') : '' }}"
+                        poster="{{ ($civilization->image ? $civilization->imageUrl('1400x620') : null) ?? asset('media/hero/home-hero.png') }}"
                     >
-                        <source src="{{ $heroVideoUrl }}">
+                        <source src="{{ $heroVideoUrl }}" type="video/mp4">
                     </video>
 
                     {{-- Fallback image removed to prefer video display in hero --}}

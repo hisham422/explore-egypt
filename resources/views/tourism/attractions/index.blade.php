@@ -2,6 +2,27 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.Default.css">
+    <style>
+        .marker-cluster--natural { background-color: rgba(60,179,113,0.95) !important; }
+        .marker-cluster--museum { background-color: rgba(70,130,180,0.95) !important; }
+        .marker-cluster--historical { background-color: rgba(218,165,32,0.95) !important; }
+        .marker-cluster .cluster-count { color: #fff; font-weight: 700; line-height: 1; text-align: center; }
+        .marker-cluster { border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .cluster-count { padding: 4px 6px; font-size: 12px; }
+        .cluster-marker--pulse { animation: pulse-ring 520ms ease-out; }
+        @keyframes pulse-ring { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+        /* loading bar for map chunk progress */
+        #map-loading-bar { transition: opacity 0.3s ease; }
+
+        /* popup summary for cluster hover */
+        .cluster-summary-popup .leaflet-popup-content-wrapper { padding: 8px 10px; border-radius: 6px; }
+        .cluster-summary { font-size: 13px; line-height: 1.2; }
+        .cluster-summary__dominant { margin-bottom: 4px; }
+        .cluster-summary__breakdown { display:flex; gap:8px; flex-wrap:wrap; }
+        .cluster-summary__item { color: #222; }
+        .cluster-summary__item strong { color: #111; }
+    </style>
 @endpush
 
 @push('scripts')
@@ -18,6 +39,9 @@
             const regionFilter = document.getElementById('attractions-map-region-filter');
             const ratingFilter = document.getElementById('attractions-map-rating-filter');
             const clearFiltersButton = document.getElementById('attractions-map-clear-filters');
+            const resetViewButton = document.getElementById('attractions-map-reset-view');
+            const visibleCountElement = document.getElementById('attractions-map-visible-count');
+            const totalCountElement = document.getElementById('attractions-map-total-count');
             const mapStyleButtons = Array.from(document.querySelectorAll('[data-map-style]'));
 
             if (!mapElement || !dataElement || typeof window.L === 'undefined') {
@@ -25,6 +49,7 @@
             }
 
             const attractions = JSON.parse(dataElement.textContent || '[]');
+            const totalAttractionsCount = attractions.length;
             const styleStorageKey = 'explore-map-style';
             const availableStyles = {
                 light: {
@@ -162,6 +187,8 @@
 
             function getAttractionTypeMeta(type) {
                 switch (type) {
+                    case 'activity':
+                        return { label: 'Activity', icon: '🎯', className: 'is-activity' };
                     case 'beach':
                         return { label: 'Beach', icon: '🌊', className: 'is-beach' };
                     case 'coastal':
@@ -220,10 +247,59 @@
                 return 'rating-low';
             }
 
+            // create loading bar element for chunkedLoading progress
+            const mapLoadingBar = document.createElement('div');
+            mapLoadingBar.id = 'map-loading-bar';
+            mapLoadingBar.style.cssText = 'position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#4CAF50,#2196F3);width:0;z-index:1000;transition:width 0.2s ease;';
+            document.body.appendChild(mapLoadingBar);
+
             const markerClusterGroup = L.markerClusterGroup({
-                maxClusterRadius: 80,
-                disableClusteringAtZoom: 10,
+                maxClusterRadius: 40,
+                disableClusteringAtZoom: 12,
                 spiderfyOnMaxZoom: true,
+                chunkedLoading: true,
+                animateAddingMarkers: false,
+                chunkProgress: function (processed, total, elapsed) {
+                    const pct = Math.round((processed / Math.max(total, 1)) * 100);
+                    try { mapLoadingBar.style.width = pct + '%'; } catch (e) {}
+                    if (pct >= 100) {
+                        setTimeout(function () { try { mapLoadingBar.style.opacity = '0'; } catch (e) {} }, 200);
+                    }
+                },
+                iconCreateFunction: function (cluster) {
+                    // determine dominant marker type inside cluster by inspecting marker classNames
+                    const children = cluster.getAllChildMarkers() || [];
+                    const counts = { natural: 0, museum: 0, historical: 0 };
+
+                    children.forEach(function (m) {
+                        try {
+                            const cls = (m.options && m.options.icon && m.options.icon.options && m.options.icon.options.className) || '';
+
+                            if (cls.indexOf('attraction-marker--natural') !== -1) counts.natural++;
+                            else if (cls.indexOf('attraction-marker--museum') !== -1) counts.museum++;
+                            else counts.historical++;
+                        } catch (e) {}
+                    });
+
+                    const dominant = Object.keys(counts).reduce(function (a, b) {
+                        return counts[a] >= counts[b] ? a : b;
+                    }, 'historical');
+
+                    const childCount = cluster.getChildCount();
+                    // smaller, logarithmic growth so clusters don't become huge
+                    const size = (function () {
+                        const base = 28;
+                        const growth = Math.round(Math.log(childCount + 1) * 5);
+                        const capped = Math.min(16, growth);
+                        return base + capped;
+                    })();
+
+                    return L.divIcon({
+                        html: '<div class="cluster-count">' + childCount + '</div>',
+                        className: 'marker-cluster marker-cluster--' + dominant,
+                        iconSize: L.point(size, size),
+                    });
+                }
             });
 
             markerClusterGroup.on('clusterclick', function (event) {
@@ -251,6 +327,55 @@
                             }, 560 + Math.min(220, idx * 35));
                         }
                     });
+                } catch (e) {}
+            });
+
+            // cluster hover summary popup
+            var _currentClusterPopup = null;
+
+            markerClusterGroup.on('clustermouseover', function (event) {
+                try {
+                    const cluster = event.layer;
+                    const children = cluster.getAllChildMarkers() || [];
+                    const counts = { activity: 0, beach: 0, coastal: 0, historical: 0 };
+
+                    children.forEach(function (m) {
+                        try {
+                            const cls = (m.options && m.options.icon && m.options.icon.options && m.options.icon.options.className) || '';
+                            if (cls.indexOf('attraction-marker--natural') !== -1) counts.activity++;
+                            else if (cls.indexOf('attraction-marker--museum') !== -1) counts.historical++;
+                            else if (cls.indexOf('attraction-marker--beach') !== -1 || cls.indexOf('is-beach') !== -1) counts.beach++;
+                            else if (cls.indexOf('attraction-marker--coastal') !== -1 || cls.indexOf('is-coastal') !== -1) counts.coastal++;
+                            else counts.historical++;
+                        } catch (e) {}
+                    });
+
+                    const total = children.length;
+                    const dominant = Object.keys(counts).reduce(function (a, b) { return counts[a] >= counts[b] ? a : b; }, 'historical');
+
+                    const parts = Object.keys(counts).map(function (k) {
+                        return '<span class="cluster-summary__item cluster-summary__item--' + k + '">' + k.charAt(0).toUpperCase() + k.slice(1) + ': <strong>' + counts[k] + '</strong></span>';
+                    }).join(' ');
+
+                    const html = '<div class="cluster-summary">' +
+                        '<div class="cluster-summary__dominant">Dominant: <strong>' + dominant + '</strong> (' + total + ')</div>' +
+                        '<div class="cluster-summary__breakdown">' + parts + '</div>' +
+                        '</div>';
+
+                    if (_currentClusterPopup) { try { map.closePopup(_currentClusterPopup); } catch (e) {} }
+                    _currentClusterPopup = L.popup({ closeButton: false, autoPan: false, className: 'cluster-summary-popup' })
+                        .setLatLng(event.latlng)
+                        .setContent(html)
+                        .openOn(map);
+                } catch (e) {}
+            });
+
+            markerClusterGroup.on('clustermouseout', function (event) {
+                try {
+                    if (_currentClusterPopup) {
+                        map.closePopup(_currentClusterPopup);
+                        _currentClusterPopup = null;
+                    }
                 } catch (e) {}
             });
 
@@ -369,6 +494,29 @@
                 searchStatus.dataset.state = isError ? 'error' : 'success';
             }
 
+            function updateCountSummary(visibleCount) {
+                if (visibleCountElement) {
+                    visibleCountElement.textContent = String(visibleCount);
+                }
+
+                if (totalCountElement) {
+                    totalCountElement.textContent = String(totalAttractionsCount);
+                }
+            }
+
+            function resetMapView() {
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+
+                if (civilizationFilter) civilizationFilter.value = '';
+                if (regionFilter) regionFilter.value = '';
+                if (ratingFilter) ratingFilter.value = '';
+
+                setSearchStatus('Map view reset. Showing all available attractions.', false);
+                refreshMarkers({ fit: true });
+            }
+
             function getActiveFilters() {
                 return {
                     civilizationId: civilizationFilter ? civilizationFilter.value : '',
@@ -405,6 +553,11 @@
                 const visibleMarkers = getVisibleMarkers();
                 const shouldFit = !options || options.fit !== false;
 
+                try {
+                    mapLoadingBar.style.opacity = '1';
+                    mapLoadingBar.style.width = '0%';
+                } catch (e) {}
+
                 markerClusterGroup.clearLayers();
 
                 visibleMarkers.forEach(function (item) {
@@ -431,7 +584,8 @@
                 }, 120);
 
                 if (visibleMarkers.length > 0) {
-                    setSearchStatus('Showing ' + visibleMarkers.length + ' attractions on the map.', false);
+                    setSearchStatus('Showing ' + visibleMarkers.length + ' of ' + totalAttractionsCount + ' attractions on the map.', false);
+                    updateCountSummary(visibleMarkers.length);
 
                     if (shouldFit) {
                         const visibleBounds = L.latLngBounds(visibleMarkers.map(function (item) {
@@ -447,8 +601,15 @@
                     }
                 } else {
                     setSearchStatus('No attractions match the selected filters.', true);
+                    updateCountSummary(0);
                     map.setView(egyptCenter, 6);
                 }
+
+                setTimeout(function () {
+                    try {
+                        mapLoadingBar.style.opacity = '0';
+                    } catch (e) {}
+                }, 300);
             }
 
             function findAttractionMatch(query) {
@@ -530,8 +691,16 @@
                 });
             }
 
+            if (resetViewButton) {
+                resetViewButton.addEventListener('click', resetMapView);
+            }
+
             map.addLayer(markerClusterGroup);
             refreshMarkers({ fit: true });
+
+            window.addEventListener('resize', function () {
+                map.invalidateSize();
+            });
         });
     </script>
 @endpush
@@ -585,6 +754,12 @@
                         </div>
 
                         <p id="attractions-map-search-status" class="map-search-panel__status" aria-live="polite"></p>
+                        <div class="map-search-panel__summary" aria-label="Map attraction summary">
+                            <span class="map-search-panel__summary-item">Visible <strong id="attractions-map-visible-count">0</strong></span>
+                            <span class="map-search-panel__summary-divider" aria-hidden="true">/</span>
+                            <span class="map-search-panel__summary-item">Total <strong id="attractions-map-total-count">{{ $mapAttractions->count() }}</strong></span>
+                            <button type="button" id="attractions-map-reset-view" class="btn btn-ghost map-search-panel__reset">Reset View</button>
+                        </div>
                         <div class="map-search-panel__legend" aria-label="Rating color legend">
                             <span class="map-search-panel__legend-item">
                                 <span class="map-search-panel__legend-swatch map-search-panel__legend-swatch--high" aria-hidden="true"></span>
@@ -630,6 +805,7 @@
                     @endphp
                     <a href="{{ route('explore', request()->except('page', 'type')) }}" class="explore-type-tab {{ $selectedType === '' ? 'is-active' : '' }}" role="tab" aria-selected="{{ $selectedType === '' ? 'true' : 'false' }}">All</a>
                     <a href="{{ route('explore', array_merge(request()->except('page'), ['type' => 'historical'])) }}" class="explore-type-tab {{ $selectedType === 'historical' ? 'is-active' : '' }}" role="tab" aria-selected="{{ $selectedType === 'historical' ? 'true' : 'false' }}">🏛️ Historical</a>
+                    <a href="{{ route('explore', array_merge(request()->except('page'), ['type' => 'activity'])) }}" class="explore-type-tab {{ $selectedType === 'activity' ? 'is-active' : '' }}" role="tab" aria-selected="{{ $selectedType === 'activity' ? 'true' : 'false' }}">🎯 Activities</a>
                     <a href="{{ route('explore', array_merge(request()->except('page'), ['type' => 'beach'])) }}" class="explore-type-tab {{ $selectedType === 'beach' ? 'is-active' : '' }}" role="tab" aria-selected="{{ $selectedType === 'beach' ? 'true' : 'false' }}">🌊 Beaches</a>
                     <a href="{{ route('explore', array_merge(request()->except('page'), ['type' => 'coastal'])) }}" class="explore-type-tab {{ $selectedType === 'coastal' ? 'is-active' : '' }}" role="tab" aria-selected="{{ $selectedType === 'coastal' ? 'true' : 'false' }}">🏝️ Coastal Cities</a>
                 </div>
@@ -644,8 +820,8 @@
                     @endforeach
                 </select>
 
-                <select name="region_id" aria-label="Filter by region">
-                    <option value="">All regions</option>
+                <select name="region_id" aria-label="Filter by governorate">
+                    <option value="">All governorates</option>
                     @foreach($regions as $region)
                         <option value="{{ $region->id }}" @selected((int) ($filters['region_id'] ?? 0) === (int) $region->id)>{{ $region->name }}</option>
                     @endforeach
@@ -697,9 +873,10 @@
                         >{{ (int) ($attraction->favorites_count ?? 0) }}</span>
 
                         <a href="{{ route('attractions.show', $attraction) }}" class="attraction-card-link">
-                            <x-image-frame :src="$attraction->imageUrl('900x560')" :alt="$attraction->name" :label="$attraction->name" placeholder-size="900x560" />
+                            <x-image-frame :src="$attraction->imageUrl('900x560')" :alt="$attraction->name" :label="$attraction->name" placeholder-size="900x560" width="900" height="560" />
                             @php
                                 $typeBadge = match($attraction->type) {
+                                    'activity' => ['🎯 Activity', 'category-badge--activity'],
                                     'beach' => ['🌊 Beach', 'category-badge--beach'],
                                     'coastal' => ['🏝️ Coastal City', 'category-badge--coastal'],
                                     default => ['🏛️ Historical', 'category-badge--historical'],

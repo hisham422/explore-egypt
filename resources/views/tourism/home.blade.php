@@ -9,9 +9,9 @@
                 loop
                 playsinline
                 preload="metadata"
-                poster="{{ $heroImageUrl }}"
+                poster="{{ asset('media/hero/home-hero.png') }}"
             >
-                <source src="{{ $heroVideoUrl }}" type="video/mp4">
+                <source src="{{ asset('media/hero/home-hero-video.mp4') }}" type="video/mp4">
             </video>
             {{-- Fallback removed: prefer video as primary hero media --}}
         </div>
@@ -20,26 +20,26 @@
         <div class="hero-overlay"></div>
         <div class="container hero-grid hero-grid--simple">
             <div class="hero-content hero-content--primary">
-                <span class="hero-pill" data-scroll-animate="fade-up" data-scroll-duration="0.85s">Trusted Egypt Travel Guide</span>
-                <p class="kicker" data-scroll-animate="fade-up" data-scroll-delay="0.06s">Explore Egypt</p>
-                <h1 data-scroll-animate="fade-up" data-scroll-delay="0.12s">Journey Through Millennia of Wonder</h1>
-                <p class="hero-text" data-scroll-animate="fade-up" data-scroll-delay="0.18s">Uncover ancient civilizations, iconic landmarks, and unforgettable stories across Egypt with curated routes built for modern travelers.</p>
+                <span class="hero-pill" data-auto-animate="fade-up" data-scroll-animate="fade-up" data-scroll-duration="0.85s" data-scroll-delay="0.06s">Trusted Egypt Travel Guide</span>
+                <p class="kicker" data-auto-animate="typewriter" data-scroll-animate="fade-up" data-scroll-duration="1.2s" data-scroll-delay="0.12s">Explore Egypt</p>
+                <h1 data-auto-animate="typewriter" data-scroll-animate="fade-up" data-scroll-duration="2.4s" data-scroll-delay="0.3s">Journey Through Millennia of Wonder</h1>
+                <p class="hero-text" data-auto-animate="typewriter" data-scroll-animate="fade-up" data-scroll-duration="3.2s" data-scroll-delay="0.5s">Uncover ancient civilizations, iconic landmarks, and unforgettable stories across Egypt with curated routes built for modern travelers.</p>
 
                 <div class="hero-actions">
-                    <a href="{{ route('explore') }}" class="btn btn-primary" data-scroll-animate="fade-up" data-scroll-delay="0.26s">Start Exploring</a>
-                    <a href="{{ route('civilizations.index') }}" class="btn btn-outline btn-light" data-scroll-animate="fade-up" data-scroll-delay="0.3s">Browse Civilizations</a>
+                    <a href="{{ route('explore') }}" class="btn btn-primary" data-auto-animate="scale-up" data-scroll-animate="fade-up" data-scroll-delay="0.3s">Start Exploring</a>
+                    <a href="{{ route('civilizations.index') }}" class="btn btn-outline btn-light" data-auto-animate="scale-up" data-scroll-animate="fade-up" data-scroll-delay="0.36s">Browse Civilizations</a>
                 </div>
 
-                <div class="hero-stats" data-scroll-animate="fade-up" data-scroll-delay="0.34s" aria-label="Explore Egypt highlights">
-                    <article data-scroll-animate="zoom-in" data-scroll-delay="0.36s">
+                <div class="hero-stats" data-auto-animate="fade-up" data-scroll-animate="fade-up" data-scroll-delay="0.42s" aria-label="Explore Egypt highlights">
+                    <article data-auto-animate="zoom-in" data-scroll-animate="zoom-in" data-scroll-delay="0.44s">
                         <strong>5000+</strong>
                         <span>Years of History</span>
                     </article>
-                    <article data-scroll-animate="zoom-in" data-scroll-delay="0.42s">
+                    <article data-auto-animate="zoom-in" data-scroll-animate="zoom-in" data-scroll-delay="0.5s">
                         <strong>100+</strong>
                         <span>Curated Attractions</span>
                     </article>
-                    <article data-scroll-animate="zoom-in" data-scroll-delay="0.48s">
+                    <article data-auto-animate="zoom-in" data-scroll-animate="zoom-in" data-scroll-delay="0.56s">
                         <strong>5</strong>
                         <span>Major Civilizations</span>
                     </article>
@@ -54,58 +54,6 @@
     <div class="hero-handoff" aria-hidden="true"></div>
 
     <!-- Civilizations section removed -->
-
-    <section class="section-block section-last home-featured-section home-popular-section" data-scroll-animate="fade-up">
-        <div class="container">
-            <div class="section-head">
-                <h2>Most Popular Attractions</h2>
-                <a href="{{ route('explore') }}">View all</a>
-            </div>
-            <div class="grid cols-3">
-                @forelse($popularAttractions as $attraction)
-                    <article class="card attraction-card" data-scroll-animate="zoom-in">
-                        @auth
-                            <button
-                                type="button"
-                                class="favorite-toggle favorite-toggle--icon favorite-toggle--floating {{ $attraction->is_favorited ? 'is-active' : '' }}"
-                                data-attraction-id="{{ $attraction->id }}"
-                                data-favorite-id="{{ $attraction->current_favorite_id ?? '' }}"
-                                data-favorited="{{ $attraction->is_favorited ? 'true' : 'false' }}"
-                                data-favorite-style="icon"
-                                data-favorite-endpoint="{{ url('/favorites') }}"
-                                aria-pressed="{{ $attraction->is_favorited ? 'true' : 'false' }}"
-                                aria-label="{{ $attraction->is_favorited ? 'Remove from favorites' : 'Add to favorites' }}"
-                            >{{ $attraction->is_favorited ? '♥' : '♡' }}</button>
-                        @else
-                            <a href="{{ route('login') }}" class="favorite-toggle favorite-toggle--icon favorite-toggle--floating favorite-toggle--login" aria-label="Login to favorite">♡</a>
-                        @endauth
-
-                        <span
-                            class="favorite-count-badge"
-                            data-attraction-id="{{ $attraction->id }}"
-                            data-favorites-count="{{ (int) ($attraction->favorites_count ?? 0) }}"
-                            data-favorites-format="badge"
-                        >{{ (int) ($attraction->favorites_count ?? 0) }}</span>
-
-                        <a href="{{ route('attractions.show', $attraction) }}" class="attraction-card-link">
-                            <x-image-frame :src="$attraction->imageUrl('900x560')" :alt="$attraction->name" :label="$attraction->name" placeholder-size="900x560" />
-                            <span class="category-badge">Attraction</span>
-                            @if(($attraction->reviews_count ?? 0) >= 8)
-                                <span class="trend-badge">Trending</span>
-                            @endif
-                            <div class="card-content">
-                                <h3>{{ $attraction->name }}</h3>
-                                <p>{{ $attraction->location }}</p>
-                                <p class="meta">★ {{ number_format((float) ($attraction->average_rating ?? 0), 1) }} · {{ $attraction->reviews_count }} reviews</p>
-                            </div>
-                        </a>
-                    </article>
-                @empty
-                    <p class="empty">Popular attractions will appear here once visitors start leaving more reviews and ratings.</p>
-                @endforelse
-            </div>
-        </div>
-    </section>
 
     <section class="section-block" data-scroll-animate="fade-up">
         <div class="container">
@@ -125,6 +73,29 @@
                     </a>
                 @empty
                     <p class="empty">Beach attractions will appear here soon.</p>
+                @endforelse
+            </div>
+        </div>
+    </section>
+
+    <section class="section-block" data-scroll-animate="fade-up">
+        <div class="container">
+            <div class="section-head">
+                <h2>Explore Activities 🎯</h2>
+                <a href="{{ route('explore', ['type' => 'activity']) }}">View all</a>
+            </div>
+            <div class="grid cols-3">
+                @forelse($activityAttractions as $attraction)
+                    <a href="{{ route('attractions.show', $attraction) }}" class="card card-link" data-scroll-animate="zoom-in">
+                        <x-image-frame :src="$attraction->imageUrl('900x560')" :alt="$attraction->name" :label="$attraction->name" placeholder-size="900x560" />
+                        <span class="category-badge category-badge--activity">🎯 Activity</span>
+                        <div class="card-content">
+                            <h3>{{ $attraction->name }}</h3>
+                            <p>{{ $attraction->location }}</p>
+                        </div>
+                    </a>
+                @empty
+                    <p class="empty">Activities like Nile tours and city experiences will appear here soon.</p>
                 @endforelse
             </div>
         </div>

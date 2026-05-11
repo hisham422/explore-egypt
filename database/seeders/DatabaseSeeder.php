@@ -22,10 +22,11 @@ class DatabaseSeeder extends Seeder
             AttractionCoordinatesSeeder::class,
             CivilizationPeriodSeeder::class,
             CivilizationPeriodAttractionSeeder::class,
+            AttractionMediaSeeder::class,
             AdminUserSeeder::class,
         ]);
 
-        User::query()->updateOrCreate(
+        User::query()->firstOrCreate(
             ['email' => 'test@example.com'],
             [
                 'name' => 'Test User',

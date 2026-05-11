@@ -1,7 +1,7 @@
 @extends('admin.layouts.app', [
     'title' => 'Admin | Attractions',
     'heading' => 'Attractions',
-    'subheading' => 'Manage attractions and their linked civilization/region',
+    'subheading' => 'Manage attractions, activities, beaches, and coastal cities',
 ])
 
 @section('content')
@@ -18,13 +18,15 @@
 
     <p class="admin-help" style="margin:0 0 10px;">{{ $attractions->total() }} total records</p>
 
-    @component('admin.components.table', ['headers' => ['ID', 'Name', 'Civilization', 'Region', 'Location', 'Gallery', 'Actions']])
+    @component('admin.components.table', ['headers' => ['ID', 'Name', 'Type', 'Civilization', 'Governorate', 'City', 'Location', 'Gallery', 'Actions']])
         @forelse($attractions as $attraction)
             <tr>
                 <td>{{ $attraction->id }}</td>
                 <td>{{ $attraction->name }}</td>
+                <td>{{ ucfirst($attraction->type) }}</td>
                 <td>{{ $attraction->civilization?->name ?? '-' }}</td>
                 <td>{{ $attraction->region?->name ?? '-' }}</td>
+                <td>{{ $attraction->city ?: '-' }}</td>
                 <td>{{ $attraction->location ?: '-' }}</td>
                 <td>{{ $attraction->images_count }}</td>
                 <td>
@@ -40,7 +42,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="7">
+                <td colspan="9">
                     <div class="admin-card-empty">
                         <p style="margin:0 0 8px;">No attractions found.</p>
                         <p class="admin-help" style="margin:0;">Adjust your search, or add a new attraction.</p>

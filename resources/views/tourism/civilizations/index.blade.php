@@ -9,7 +9,7 @@
             <div class="grid cols-3">
                 @forelse($civilizations as $civilization)
                     <a href="{{ route('civilizations.show', $civilization) }}" class="card card-link civilization-card">
-                        <x-image-frame :src="$civilization->image" :alt="$civilization->name" :label="$civilization->name" placeholder-size="800x500" />
+                        <x-image-frame :src="$civilization->image" :alt="$civilization->name" :label="$civilization->name" placeholder-size="800x500" width="800" height="500" />
                         <span class="category-badge category-badge--civilization">Civilization</span>
                         <div class="card-content">
                             <h3>{{ $civilization->name }}</h3>

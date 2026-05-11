@@ -218,7 +218,7 @@ class CivilizationPeriodSeeder extends Seeder
             }
 
             foreach ($periodsList as $periodData) {
-                CivilizationPeriod::updateOrCreate(
+                CivilizationPeriod::query()->firstOrCreate(
                     [
                         'civilization_id' => $civilization->id,
                         'title' => $periodData['title'],

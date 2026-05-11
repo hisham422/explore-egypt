@@ -40,6 +40,10 @@ class AttractionCoordinatesSeeder extends Seeder
 
         foreach ($attractions as $name => $coords) {
             Attraction::where('name', 'like', '%' . $name . '%')
+                ->whereColumn('created_at', 'updated_at')
+                ->where(function ($query) {
+                    $query->whereNull('lat')->orWhereNull('lng');
+                })
                 ->update([
                     'lat' => $coords['lat'],
                     'lng' => $coords['lng'],
@@ -57,6 +61,7 @@ class AttractionCoordinatesSeeder extends Seeder
 
         foreach ($locationHints as $hint) {
             Attraction::whereRaw('lat is null or lng is null')
+                ->whereColumn('created_at', 'updated_at')
                 ->where('name', 'like', '%' . $hint['search'] . '%')
                 ->update([
                     'lat' => $hint['lat'],

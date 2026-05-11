@@ -28,7 +28,8 @@ class AttractionController extends Controller
                 $query->where(function ($innerQuery) use ($search) {
                     $innerQuery->where('name', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%")
-                        ->orWhere('location', 'like', "%{$search}%");
+                        ->orWhere('location', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%");
                 });
             })
             ->latest()
@@ -215,12 +216,19 @@ class AttractionController extends Controller
             'media' => ['nullable', 'array'],
             'media.*' => ['file', 'mimes:jpg,jpeg,png,webp,mp4', 'max:10240'],
             'location' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
             'lat' => ['nullable', 'numeric', 'between:-90,90'],
             'lng' => ['nullable', 'numeric', 'between:-180,180'],
-            'civilization_id' => ['required', 'exists:civilizations,id'],
+            'civilization_id' => ['nullable', 'exists:civilizations,id'],
             'civilization_period_id' => [
                 'nullable',
-                Rule::exists('civilization_periods', 'id')->where(fn ($query) => $query->where('civilization_id', $request->integer('civilization_id'))),
+                Rule::exists('civilization_periods', 'id')->where(function ($query) use ($request) {
+                    $civilizationId = $request->integer('civilization_id');
+
+                    if ($civilizationId > 0) {
+                        $query->where('civilization_id', $civilizationId);
+                    }
+                }),
             ],
             'region_id' => ['required', 'exists:regions,id'],
         ]);

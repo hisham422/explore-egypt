@@ -159,13 +159,8 @@ class TourismController extends Controller
         }
 
         $heroImage = SiteSetting::getValue('home_hero_image');
-        $heroImageUrl = ImageManager::publicUrl($heroImage, 'Explore Egypt', '1600x900');
-        $heroVideo = SiteSetting::getValue('home_hero_video_url');
-        $heroVideoUrl = $heroVideo
-            ? (Str::startsWith($heroVideo, ['http://', 'https://'])
-                ? $heroVideo
-                : asset('storage/'.$heroVideo))
-            : 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
+        $heroImageUrl = asset('media/hero/home-hero.png');
+        $heroVideoUrl = asset('media/hero/home-hero-video.mp4');
 
         $beachAttractions = Attraction::query()
             ->apiBase()
@@ -176,6 +171,12 @@ class TourismController extends Controller
         $historicalAttractions = Attraction::query()
             ->apiBase()
             ->historical()
+            ->take(3)
+            ->get();
+
+        $activityAttractions = Attraction::query()
+            ->apiBase()
+            ->activities()
             ->take(3)
             ->get();
 
@@ -202,6 +203,7 @@ class TourismController extends Controller
             'heroVideoUrl',
             'beachAttractions',
             'historicalAttractions',
+            'activityAttractions',
             'coastalAttractions',
             'summerRecommendations'
         ));
@@ -239,7 +241,7 @@ class TourismController extends Controller
             ? (Str::startsWith($civilization->hero_video_url, ['http://', 'https://'])
                 ? $civilization->hero_video_url
                 : asset('storage/'.$civilization->hero_video_url))
-            : 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
+            : asset('media/hero/home-hero-video.mp4');
 
         $attractions = $query->paginate(12)->withQueryString();
 
@@ -398,6 +400,7 @@ class TourismController extends Controller
     {
         return match ($attraction->type) {
             Attraction::TYPE_BEACH, Attraction::TYPE_COASTAL => 'natural',
+            Attraction::TYPE_ACTIVITY => 'museum',
             Attraction::TYPE_HISTORICAL => 'historical',
             default => 'historical',
         };

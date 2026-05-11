@@ -25,7 +25,7 @@
             return this.availablePeriods.some(period => period.id === this.periodId);
         },
     }"
-    x-effect="if (civilizationId && !periodStillValid) periodId = ''"
+    x-effect="if (!civilizationId || !periodStillValid) periodId = ''"
 >
     <div class="admin-field">
         <label for="name">Name</label>
@@ -40,9 +40,16 @@
     </div>
 
     <div class="admin-field">
+        <label for="city">City</label>
+        <input id="city" type="text" name="city" value="{{ old('city', $attraction->city) }}" placeholder="e.g. Cairo, Suez, Alexandria">
+        @error('city')<p class="admin-error">{{ $message }}</p>@enderror
+    </div>
+
+    <div class="admin-field">
         <label for="type">Attraction Type</label>
         <select id="type" name="type" required>
             <option value="historical" @selected(old('type', $attraction->type ?: 'historical') === 'historical')>Historical</option>
+            <option value="activity" @selected(old('type', $attraction->type) === 'activity')>Activity</option>
             <option value="beach" @selected(old('type', $attraction->type) === 'beach')>Beach</option>
             <option value="coastal" @selected(old('type', $attraction->type) === 'coastal')>Coastal City</option>
         </select>
@@ -50,9 +57,9 @@
     </div>
 
     <div class="admin-field">
-        <label for="civilization_id">Civilization</label>
-        <select id="civilization_id" name="civilization_id" required x-model="civilizationId">
-            <option value="">Select civilization</option>
+        <label for="civilization_id">Civilization (optional)</label>
+        <select id="civilization_id" name="civilization_id" x-model="civilizationId">
+            <option value="">No civilization</option>
             @foreach($civilizations as $civilization)
                 <option value="{{ $civilization->id }}" @selected((int) old('civilization_id', $attraction->civilization_id) === (int) $civilization->id)>
                     {{ $civilization->name }}
@@ -63,9 +70,9 @@
     </div>
 
     <div class="admin-field">
-        <label for="region_id">Region</label>
+        <label for="region_id">Governorate / Region</label>
         <select id="region_id" name="region_id" required>
-            <option value="">Select region</option>
+            <option value="">Select governorate</option>
             @foreach($regions as $region)
                 <option value="{{ $region->id }}" @selected((int) old('region_id', $attraction->region_id) === (int) $region->id)>
                     {{ $region->name }}

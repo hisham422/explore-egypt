@@ -1070,9 +1070,9 @@
             </div>
         </header>
 
-        <section class="admin-content" data-scroll-animate="fade-up" data-scroll-duration="0.75s">
+        <section class="admin-content">
             @if(session('status'))
-                    <div class="admin-alert" data-scroll-animate="fade-up" data-scroll-duration="0.75s">{{ session('status') }}</div>
+                <div class="admin-alert">{{ session('status') }}</div>
             @endif
 
             @if(session('error'))

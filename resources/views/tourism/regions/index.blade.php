@@ -9,7 +9,7 @@
             <div class="grid cols-4 region-grid">
                 @forelse($regions as $region)
                     <a href="{{ route('regions.show', $region) }}" class="card card-link region-card">
-                        <x-image-frame :src="$region->image" :alt="$region->name" :label="$region->name" placeholder-size="800x500" />
+                        <x-image-frame :src="$region->image" :alt="$region->name" :label="$region->name" placeholder-size="800x500" width="800" height="500" />
                         <span class="category-badge category-badge--region">Region</span>
                         <div class="card-content">
                             <h3>{{ $region->name }}</h3>

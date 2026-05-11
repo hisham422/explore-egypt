@@ -15,11 +15,13 @@ class Attraction extends Model
     use HasFactory, HasStoredImage;
 
     protected $fillable = [
+        'seed_key',
         'name',
         'description',
         'image',
         'type',
         'location',
+        'city',
         'lat',
         'lng',
         'civilization_id',
@@ -33,14 +35,23 @@ class Attraction extends Model
     ];
 
     public const TYPE_HISTORICAL = 'historical';
+    public const TYPE_ACTIVITY = 'activity';
     public const TYPE_BEACH = 'beach';
     public const TYPE_COASTAL = 'coastal';
 
     public const TYPES = [
         self::TYPE_HISTORICAL,
+        self::TYPE_ACTIVITY,
         self::TYPE_BEACH,
         self::TYPE_COASTAL,
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $attraction): void {
+            $attraction->normalizeCoastalPlacement();
+        });
+    }
 
     // 🔥 rename عشان consistency
     protected $appends = ['average_rating', 'reviews_count', 'favorites_count'];
@@ -122,6 +133,11 @@ class Attraction extends Model
         return $query->where('type', self::TYPE_BEACH);
     }
 
+    public function scopeActivities(Builder $query): Builder
+    {
+        return $query->where('type', self::TYPE_ACTIVITY);
+    }
+
     public function scopeCoastal(Builder $query): Builder
     {
         return $query->where('type', self::TYPE_COASTAL);
@@ -145,5 +161,38 @@ class Attraction extends Model
     public function getFavoritesCountAttribute(): int
     {
         return (int) ($this->attributes['favorites_count'] ?? 0);
+    }
+
+    private function normalizeCoastalPlacement(): void
+    {
+        if (! in_array($this->type, [self::TYPE_BEACH, self::TYPE_COASTAL], true)) {
+            return;
+        }
+
+        $coastalRegions = [
+            'Hurghada' => 'Red Sea',
+            'El Gouna' => 'Red Sea',
+            'Sharm El Sheikh' => 'South Sinai',
+            'Dahab' => 'South Sinai',
+            'Marsa Matrouh' => 'Matrouh',
+            'North Coast' => 'Matrouh',
+            'Alexandria' => 'Alexandria',
+        ];
+
+        $city = $this->city ?: $this->location;
+
+        if (! isset($coastalRegions[$city])) {
+            return;
+        }
+
+        $regionName = $coastalRegions[$city];
+        $regionId = Region::query()->where('name', $regionName)->value('id');
+
+        if (! $regionId) {
+            return;
+        }
+
+        $this->city = $city === 'North Coast' ? 'Marsa Matrouh' : $city;
+        $this->region_id = $regionId;
     }
 }

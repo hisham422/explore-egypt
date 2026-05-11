@@ -4,8 +4,9 @@
             @php
                 $currentFavorite = auth()->check() ? $attraction->favorites->first() : null;
                 $galleryItems = collect();
+                $heroCandidate = null;
 
-                // Add main attraction image as first gallery item
+                // Add main attraction image as first gallery item if substantial size
                 if ($attraction->image) {
                     $galleryItems->push([
                         'src' => $attraction->imageUrl('1200x620'),
@@ -25,6 +26,15 @@
                             'type' => 'video',
                         ]);
                     } else {
+                        // Use first non-video image as hero candidate if not set
+                        if (!$heroCandidate) {
+                            $heroCandidate = [
+                                'src' => $galleryMedia->imageUrl('1200x620'),
+                                'thumb' => $galleryMedia->imageUrl('360x240'),
+                                'alt' => $attraction->name.' gallery image',
+                                'type' => 'image',
+                            ];
+                        }
                         $galleryItems->push([
                             'src' => $galleryMedia->imageUrl('1200x620'),
                             'thumb' => $galleryMedia->imageUrl('360x240'),
@@ -34,20 +44,24 @@
                     }
                 }
 
-                // Ensure at least one item with fallback
-                if ($galleryItems->isEmpty()) {
-                    $galleryItems->push([
-                        'src' => $attraction->imageUrl('1200x620'),
-                        'thumb' => $attraction->imageUrl('360x240'),
-                        'alt' => $attraction->name,
-                        'type' => 'image',
-                    ]);
+                // Use gallery image as hero if available and better than main image
+                if ($heroCandidate) {
+                    $heroGalleryItem = $heroCandidate;
+                } else {
+                    // Fallback to first gallery item or main image
+                    // Ensure at least one item with fallback
+                    if ($galleryItems->isEmpty()) {
+                        $galleryItems->push([
+                            'src' => $attraction->imageUrl('1200x620'),
+                            'thumb' => $attraction->imageUrl('360x240'),
+                            'alt' => $attraction->name,
+                            'type' => 'image',
+                        ]);
+                    }
+                    $heroGalleryItem = $galleryItems->first();
                 }
 
                 $galleryItems = $galleryItems->unique('src')->values();
-            @endphp
-            @php
-                $heroGalleryItem = $galleryItems->first();
             @endphp
             <article class="detail-card">
                 <div class="detail-hero-wrap">
@@ -148,7 +162,7 @@
                                     >
                                         @if($item['type'] === 'video')
                                             <div class="gallery-thumb-video" style="position:relative;width:100%;height:100%;background:#000;display:flex;align-items:center;justify-content:center;border-radius:8px;overflow:hidden;">
-                                                <video class="gallery-thumb-video__preview" muted playsinline>
+                                                <video class="gallery-thumb-video__preview" muted playsinline preload="none" loading="lazy">
                                                     <source src="{{ $item['src'] }}" type="video/mp4" crossorigin="anonymous">
                                                 </video>
                                                 <span class="gallery-thumb-video__icon" aria-hidden="true">
@@ -156,7 +170,7 @@
                                                 </span>
                                             </div>
                                         @else
-                                            <x-image-frame :src="$item['thumb']" :alt="$item['alt']" :label="$item['alt']" placeholder-size="360x240" />
+                                            <x-image-frame :src="$item['thumb']" :alt="$item['alt']" :label="$item['alt']" placeholder-size="360x240" width="360" height="240" />
                                         @endif
                                     </button>
                                 @endforeach

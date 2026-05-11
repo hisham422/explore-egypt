@@ -263,6 +263,16 @@
 	color: #8d5a12;
 }
 
+.cluster-popup__type.is-activity {
+	background: rgba(168, 85, 247, 0.14);
+	color: #6d28d9;
+}
+
+.cluster-popup__type.is-shopping {
+	background: rgba(245, 158, 11, 0.16);
+	color: #92400e;
+}
+
 .cluster-popup__type.is-beach {
 	background: rgba(6, 182, 212, 0.14);
 	color: #0e7490;

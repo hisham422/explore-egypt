@@ -27,8 +27,36 @@ class ScrollAnimationsManager {
 			this.setupPageTransitions();
 		}
 
+		// Trigger auto-animations on page load
+		this.setupAutoAnimations();
+
 		// Initial check for elements already in view
 		this.observeElements();
+	}
+
+	setupAutoAnimations() {
+		// Find all elements with auto-animate attribute (for page load animations)
+		const autoAnimateElements = document.querySelectorAll('[data-auto-animate]');
+
+		autoAnimateElements.forEach((element) => {
+			// Store original text content
+			const originalText = element.textContent;
+			const charCount = originalText.length;
+			
+			// Calculate character count for typewriter effect
+			if (element.dataset.autoAnimate === 'typewriter' || element.dataset.scrollAnimate === 'typewriter') {
+				// Store original text as data attribute
+				element.dataset.originalText = originalText;
+				element.style.setProperty('--char-count', charCount);
+				
+				// Keep text visible initially for layout
+			}
+
+			// Use a small delay to ensure DOM is ready
+			setTimeout(() => {
+				this.animateElement(element);
+			}, 50);
+		});
 	}
 
 	setupIntersectionObserver() {
@@ -68,8 +96,8 @@ class ScrollAnimationsManager {
 	}
 
 	animateElement(element) {
-		// Set animation type
-		const animationType = element.dataset.scrollAnimate || 'fade-up';
+		// Set animation type - prioritize auto-animate over scroll-animate
+		const animationType = element.dataset.autoAnimate || element.dataset.scrollAnimate || 'fade-up';
 		const duration = element.dataset.scrollDuration || `${this.options.animationDuration}s`;
 		const delay = element.dataset.scrollDelay || '0s';
 
@@ -83,6 +111,15 @@ class ScrollAnimationsManager {
 
 		// Emit custom event
 		element.dispatchEvent(new CustomEvent('scroll-animated', { bubbles: true }));
+	}
+
+	parseDuration(durationStr) {
+		if (typeof durationStr === 'number') return durationStr;
+		const match = String(durationStr).match(/^([\d.]+)(ms|s)?$/);
+		if (!match) return 1000;
+		const value = parseFloat(match[1]);
+		const unit = match[2] || 's';
+		return unit === 'ms' ? value : value * 1000;
 	}
 
 	// Initialize timeline animations (ScrollAnimationsManager scope)

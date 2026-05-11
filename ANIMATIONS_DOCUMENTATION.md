@@ -24,6 +24,7 @@
 ```
 
 ### 2. **Page Transition Animations** ✅
+
 - Smooth fade transitions when navigating between pages
 - Cinematic blur effect on page exit
 - Auto-detection of navigation links
