@@ -3,12 +3,20 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.Default.css">
     <style>
-        .marker-cluster--natural { background-color: rgba(60,179,113,0.95) !important; }
-        .marker-cluster--museum { background-color: rgba(70,130,180,0.95) !important; }
-        .marker-cluster--historical { background-color: rgba(218,165,32,0.95) !important; }
+        .marker-cluster--activity { background-color: rgba(255, 152, 0, 0.95) !important; }
+        .marker-cluster--beach { background-color: rgba(33, 150, 243, 0.95) !important; }
+        .marker-cluster--coastal { background-color: rgba(38, 166, 154, 0.95) !important; }
+        .marker-cluster--historical { background-color: rgba(218, 165, 32, 0.95) !important; }
         .marker-cluster .cluster-count { color: #fff; font-weight: 700; line-height: 1; text-align: center; }
         .marker-cluster { border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cluster-count { padding: 4px 6px; font-size: 12px; }
+        .map-search-panel__category-legend { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .map-search-panel__category-chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 999px; background: #fff; color: #25324b; box-shadow: 0 1px 2px rgba(15,23,42,.08); border: 1px solid rgba(148,163,184,.35); font-size: 12px; }
+        .map-search-panel__category-dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
+        .map-search-panel__category-dot--historical { background: rgba(218,165,32,1); }
+        .map-search-panel__category-dot--activity { background: rgba(255,152,0,1); }
+        .map-search-panel__category-dot--beach { background: rgba(33,150,243,1); }
+        .map-search-panel__category-dot--coastal { background: rgba(38,166,154,1); }
         .cluster-marker--pulse { animation: pulse-ring 520ms ease-out; }
         @keyframes pulse-ring { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
 
@@ -148,16 +156,20 @@
             }
 
             function createMarkerIcon(markerType, rating, isFavorited) {
-                const normalizedType = ['natural', 'museum', 'historical'].includes(markerType) ? markerType : 'historical';
+                const normalizedType = ['historical', 'activity', 'beach', 'coastal'].includes(markerType) ? markerType : 'historical';
                 const normalizedRatingBand = getRatingBand(rating);
                 const favoriteClass = isFavorited ? ' attraction-marker--favorite' : '';
                 const favoriteBadge = isFavorited ? '<span class="attraction-marker__favorite-badge" aria-hidden="true">★</span>' : '';
+                const glyphs = {
+                    historical: '🏛️',
+                    activity: '🎯',
+                    beach: '🌊',
+                    coastal: '🏝️',
+                };
 
                 return L.divIcon({
                     className: 'attraction-marker attraction-marker--' + normalizedType + ' attraction-marker--' + normalizedRatingBand + favoriteClass,
-                    html: '<span class="attraction-marker__glyph" aria-hidden="true">' + (
-                        normalizedType === 'natural' ? '🌿' : normalizedType === 'museum' ? '🏛' : '⛩'
-                    ) + '</span>' + favoriteBadge,
+                    html: '<span class="attraction-marker__glyph" aria-hidden="true">' + glyphs[normalizedType] + '</span>' + favoriteBadge,
                     iconSize: [34, 34],
                     iconAnchor: [17, 34],
                     popupAnchor: [0, -30],
@@ -192,7 +204,7 @@
                     case 'beach':
                         return { label: 'Beach', icon: '🌊', className: 'is-beach' };
                     case 'coastal':
-                        return { label: 'Coastal City', icon: '🏝️', className: 'is-coastal' };
+                        return { label: 'Coastal', icon: '🏝️', className: 'is-coastal' };
                     default:
                         return { label: 'Historical', icon: '🏛️', className: 'is-historical' };
                 }
@@ -267,16 +279,16 @@
                     }
                 },
                 iconCreateFunction: function (cluster) {
-                    // determine dominant marker type inside cluster by inspecting marker classNames
                     const children = cluster.getAllChildMarkers() || [];
-                    const counts = { natural: 0, museum: 0, historical: 0 };
+                    const counts = { historical: 0, activity: 0, beach: 0, coastal: 0 };
 
                     children.forEach(function (m) {
                         try {
                             const cls = (m.options && m.options.icon && m.options.icon.options && m.options.icon.options.className) || '';
 
-                            if (cls.indexOf('attraction-marker--natural') !== -1) counts.natural++;
-                            else if (cls.indexOf('attraction-marker--museum') !== -1) counts.museum++;
+                            if (cls.indexOf('attraction-marker--activity') !== -1) counts.activity++;
+                            else if (cls.indexOf('attraction-marker--beach') !== -1) counts.beach++;
+                            else if (cls.indexOf('attraction-marker--coastal') !== -1) counts.coastal++;
                             else counts.historical++;
                         } catch (e) {}
                     });
@@ -286,7 +298,6 @@
                     }, 'historical');
 
                     const childCount = cluster.getChildCount();
-                    // smaller, logarithmic growth so clusters don't become huge
                     const size = (function () {
                         const base = 28;
                         const growth = Math.round(Math.log(childCount + 1) * 5);
@@ -337,15 +348,14 @@
                 try {
                     const cluster = event.layer;
                     const children = cluster.getAllChildMarkers() || [];
-                    const counts = { activity: 0, beach: 0, coastal: 0, historical: 0 };
+                    const counts = { historical: 0, activity: 0, beach: 0, coastal: 0 };
 
                     children.forEach(function (m) {
                         try {
                             const cls = (m.options && m.options.icon && m.options.icon.options && m.options.icon.options.className) || '';
-                            if (cls.indexOf('attraction-marker--natural') !== -1) counts.activity++;
-                            else if (cls.indexOf('attraction-marker--museum') !== -1) counts.historical++;
-                            else if (cls.indexOf('attraction-marker--beach') !== -1 || cls.indexOf('is-beach') !== -1) counts.beach++;
-                            else if (cls.indexOf('attraction-marker--coastal') !== -1 || cls.indexOf('is-coastal') !== -1) counts.coastal++;
+                            if (cls.indexOf('attraction-marker--activity') !== -1) counts.activity++;
+                            else if (cls.indexOf('attraction-marker--beach') !== -1) counts.beach++;
+                            else if (cls.indexOf('attraction-marker--coastal') !== -1) counts.coastal++;
                             else counts.historical++;
                         } catch (e) {}
                     });
@@ -381,7 +391,7 @@
 
             const attractionMarkers = attractions.map(function (attraction) {
                 const marker = L.marker([attraction.lat, attraction.lng], {
-                    icon: createMarkerIcon(attraction.marker_type, attraction.rating, attraction.is_favorited),
+                    icon: createMarkerIcon(attraction.category || attraction.type, attraction.rating, attraction.is_favorited),
                 }).bindTooltip(
                     buildMarkerTooltip(attraction),
                     {
@@ -778,6 +788,12 @@
                                 Favorited
                             </span>
                         </div>
+                        <div class="map-search-panel__category-legend" aria-label="Category legend">
+                            <span class="map-search-panel__category-chip"><span class="map-search-panel__category-dot map-search-panel__category-dot--historical" aria-hidden="true"></span>Historical</span>
+                            <span class="map-search-panel__category-chip"><span class="map-search-panel__category-dot map-search-panel__category-dot--activity" aria-hidden="true"></span>Activities</span>
+                            <span class="map-search-panel__category-chip"><span class="map-search-panel__category-dot map-search-panel__category-dot--beach" aria-hidden="true"></span>Beaches</span>
+                            <span class="map-search-panel__category-chip"><span class="map-search-panel__category-dot map-search-panel__category-dot--coastal" aria-hidden="true"></span>Coastal</span>
+                        </div>
                         <div class="map-style-switcher" aria-label="Map style switcher">
                             <button type="button" class="map-style-switcher__button" data-map-style="light" aria-pressed="false">Light</button>
                             <button type="button" class="map-style-switcher__button" data-map-style="dark" aria-pressed="false">Dark</button>
@@ -807,7 +823,6 @@
                     <a href="{{ route('explore', array_merge(request()->except('page'), ['type' => 'historical'])) }}" class="explore-type-tab {{ $selectedType === 'historical' ? 'is-active' : '' }}" role="tab" aria-selected="{{ $selectedType === 'historical' ? 'true' : 'false' }}">🏛️ Historical</a>
                     <a href="{{ route('explore', array_merge(request()->except('page'), ['type' => 'activity'])) }}" class="explore-type-tab {{ $selectedType === 'activity' ? 'is-active' : '' }}" role="tab" aria-selected="{{ $selectedType === 'activity' ? 'true' : 'false' }}">🎯 Activities</a>
                     <a href="{{ route('explore', array_merge(request()->except('page'), ['type' => 'beach'])) }}" class="explore-type-tab {{ $selectedType === 'beach' ? 'is-active' : '' }}" role="tab" aria-selected="{{ $selectedType === 'beach' ? 'true' : 'false' }}">🌊 Beaches</a>
-                    <a href="{{ route('explore', array_merge(request()->except('page'), ['type' => 'coastal'])) }}" class="explore-type-tab {{ $selectedType === 'coastal' ? 'is-active' : '' }}" role="tab" aria-selected="{{ $selectedType === 'coastal' ? 'true' : 'false' }}">🏝️ Coastal Cities</a>
                 </div>
 
                 <input type="hidden" name="type" value="{{ $selectedType }}">
@@ -878,7 +893,6 @@
                                 $typeBadge = match($attraction->type) {
                                     'activity' => ['🎯 Activity', 'category-badge--activity'],
                                     'beach' => ['🌊 Beach', 'category-badge--beach'],
-                                    'coastal' => ['🏝️ Coastal City', 'category-badge--coastal'],
                                     default => ['🏛️ Historical', 'category-badge--historical'],
                                 };
                             @endphp

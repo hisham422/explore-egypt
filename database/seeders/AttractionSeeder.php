@@ -381,15 +381,7 @@ class AttractionSeeder extends Seeder
         ];
 
         foreach ($items as $item) {
-            $query = Attraction::query();
-
-            if ($item['type'] === 'activity') {
-                $query->updateOrCreate(['seed_key' => $item['seed_key']], $item);
-
-                continue;
-            }
-
-            $query->firstOrCreate(['seed_key' => $item['seed_key']], $item);
+            Attraction::query()->firstOrCreate(['seed_key' => $item['seed_key']], $item);
         }
     }
 }

@@ -346,14 +346,18 @@ class TourismController extends Controller
             $query->withUserFavoriteState(Auth::id());
         }
 
-        $mapAttractions = (clone $query)
+        $mapQuery = Attraction::query()
+            ->apiBase()
             ->whereNotNull('lat')
-            ->whereNotNull('lng')
-            ->limit(250)
+            ->whereNotNull('lng');
+
+        if (Auth::check()) {
+            $mapQuery->withUserFavoriteState(Auth::id());
+        }
+
+        $mapAttractions = $mapQuery
             ->get(['id', 'name', 'description', 'image', 'type', 'location', 'lat', 'lng', 'civilization_id', 'region_id', 'reviews_avg_rating', 'reviews_count'])
             ->map(function (Attraction $attraction): array {
-                $markerType = $this->resolveMapMarkerType($attraction);
-
                 return [
                     'id' => $attraction->id,
                     'name' => $attraction->name,
@@ -365,12 +369,13 @@ class TourismController extends Controller
                     'is_favorited' => (bool) ($attraction->is_favorited ?? false),
                     'civilization_id' => (int) ($attraction->civilization_id ?? 0),
                     'region_id' => (int) ($attraction->region_id ?? 0),
+                    'type' => $attraction->type,
+                    'category' => $this->resolveMapMarkerType($attraction),
                     'image' => $attraction->image
                         ? (Str::startsWith($attraction->image, ['http://', 'https://'])
                             ? $attraction->image
                             : asset('storage/' . $attraction->image))
                         : null,
-                    'marker_type' => $markerType,
                     'url' => route('attractions.show', $attraction),
                 ];
             })
@@ -399,8 +404,9 @@ class TourismController extends Controller
     private function resolveMapMarkerType(Attraction $attraction): string
     {
         return match ($attraction->type) {
-            Attraction::TYPE_BEACH, Attraction::TYPE_COASTAL => 'natural',
-            Attraction::TYPE_ACTIVITY => 'museum',
+            Attraction::TYPE_ACTIVITY => 'activity',
+            Attraction::TYPE_BEACH => 'beach',
+            Attraction::TYPE_COASTAL => 'coastal',
             Attraction::TYPE_HISTORICAL => 'historical',
             default => 'historical',
         };

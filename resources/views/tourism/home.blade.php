@@ -20,28 +20,27 @@
         <div class="hero-overlay"></div>
         <div class="container hero-grid hero-grid--simple">
             <div class="hero-content hero-content--primary">
-                <span class="hero-pill" data-auto-animate="fade-up" data-scroll-animate="fade-up" data-scroll-duration="0.85s" data-scroll-delay="0.06s">Trusted Egypt Travel Guide</span>
-                <p class="kicker" data-auto-animate="typewriter" data-scroll-animate="fade-up" data-scroll-duration="1.2s" data-scroll-delay="0.12s">Explore Egypt</p>
-                <h1 data-auto-animate="typewriter" data-scroll-animate="fade-up" data-scroll-duration="2.4s" data-scroll-delay="0.3s">Journey Through Millennia of Wonder</h1>
-                <p class="hero-text" data-auto-animate="typewriter" data-scroll-animate="fade-up" data-scroll-duration="3.2s" data-scroll-delay="0.5s">Uncover ancient civilizations, iconic landmarks, and unforgettable stories across Egypt with curated routes built for modern travelers.</p>
+                <div class="hero-badges" data-auto-animate="fade-up" data-scroll-animate="fade-up" data-scroll-duration="0.85s" data-scroll-delay="0.06s">
+                    <span class="hero-pill">Trusted Egypt Travel Guide</span>
+                </div>
+
+                <p class="kicker" data-auto-animate="fade-up" data-scroll-animate="fade-up" data-scroll-duration="1.2s" data-scroll-delay="0.12s">Explore Egypt</p>
+                <h1 data-auto-animate="fade-up" data-scroll-animate="fade-up" data-scroll-duration="2.4s" data-scroll-delay="0.3s">Journey Through Millennia of Wonder</h1>
+                <p class="hero-text" data-auto-animate="fade-up" data-scroll-animate="fade-up" data-scroll-duration="3.2s" data-scroll-delay="0.5s">Uncover ancient civilizations, iconic landmarks, and unforgettable stories across Egypt with curated routes built for modern travelers.</p>
 
                 <div class="hero-actions">
                     <a href="{{ route('explore') }}" class="btn btn-primary" data-auto-animate="scale-up" data-scroll-animate="fade-up" data-scroll-delay="0.3s">Start Exploring</a>
                     <a href="{{ route('civilizations.index') }}" class="btn btn-outline btn-light" data-auto-animate="scale-up" data-scroll-animate="fade-up" data-scroll-delay="0.36s">Browse Civilizations</a>
                 </div>
 
-                <div class="hero-stats" data-auto-animate="fade-up" data-scroll-animate="fade-up" data-scroll-delay="0.42s" aria-label="Explore Egypt highlights">
+                <div class="hero-stats hero-stats--compact hero-stats--glass" data-auto-animate="fade-up" data-scroll-animate="fade-up" data-scroll-delay="0.42s" aria-label="Explore Egypt highlights">
                     <article data-auto-animate="zoom-in" data-scroll-animate="zoom-in" data-scroll-delay="0.44s">
                         <strong>5000+</strong>
                         <span>Years of History</span>
                     </article>
                     <article data-auto-animate="zoom-in" data-scroll-animate="zoom-in" data-scroll-delay="0.5s">
-                        <strong>100+</strong>
-                        <span>Curated Attractions</span>
-                    </article>
-                    <article data-auto-animate="zoom-in" data-scroll-animate="zoom-in" data-scroll-delay="0.56s">
-                        <strong>5</strong>
-                        <span>Major Civilizations</span>
+                        <strong>{{ $historicalAttractions->count() + $activityAttractions->count() + $beachAttractions->count() + $coastalAttractions->count() }}</strong>
+                        <span>Curated Experiences</span>
                     </article>
                 </div>
             </div>
@@ -127,29 +126,6 @@
     <section class="section-block" data-scroll-animate="fade-up">
         <div class="container">
             <div class="section-head">
-                <h2>Explore Coastal Cities 🏝️</h2>
-                <a href="{{ route('explore', ['type' => 'coastal']) }}">View all</a>
-            </div>
-            <div class="grid cols-3">
-                @forelse($coastalAttractions as $attraction)
-                    <a href="{{ route('attractions.show', $attraction) }}" class="card card-link" data-scroll-animate="zoom-in">
-                        <x-image-frame :src="$attraction->imageUrl('900x560')" :alt="$attraction->name" :label="$attraction->name" placeholder-size="900x560" />
-                        <span class="category-badge category-badge--coastal">🏝️ Coastal City</span>
-                        <div class="card-content">
-                            <h3>{{ $attraction->name }}</h3>
-                            <p>{{ $attraction->location }}</p>
-                        </div>
-                    </a>
-                @empty
-                    <p class="empty">Coastal city attractions will appear here soon.</p>
-                @endforelse
-            </div>
-        </div>
-    </section>
-
-    <section class="section-block" data-scroll-animate="fade-up">
-        <div class="container">
-            <div class="section-head">
                 <h2>Recommended for Summer ☀️</h2>
                 <a href="{{ route('explore', ['type' => 'beach']) }}">Plan your trip</a>
             </div>
@@ -157,8 +133,8 @@
                 @forelse($summerRecommendations as $attraction)
                     <a href="{{ route('attractions.show', $attraction) }}" class="card card-link" data-scroll-animate="zoom-in">
                         <x-image-frame :src="$attraction->imageUrl('900x560')" :alt="$attraction->name" :label="$attraction->name" placeholder-size="900x560" />
-                        <span class="category-badge {{ $attraction->type === 'coastal' ? 'category-badge--coastal' : 'category-badge--beach' }}">
-                            {{ $attraction->type === 'coastal' ? '🏝️ Coastal City' : '🌊 Beach' }}
+                        <span class="category-badge category-badge--beach">
+                            🌊 Beach
                         </span>
                         <div class="card-content">
                             <h3>{{ $attraction->name }}</h3>

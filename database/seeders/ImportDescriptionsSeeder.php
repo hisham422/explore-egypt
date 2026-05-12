@@ -47,6 +47,10 @@ class ImportDescriptionsSeeder extends Seeder
 
             $updated_count = DB::table('attractions')
                 ->where('seed_key', $seedKey)
+                ->where(function ($query) {
+                    $query->whereNull('description')
+                        ->orWhere('description', '=', '');
+                })
                 ->update([
                     'description' => $description,
                     'updated_at' => now(),

@@ -664,10 +664,17 @@ body.tourism-body {
 	background-size: cover;
 	background-position: center;
 	background-repeat: no-repeat;
-	min-height: clamp(380px, 62vh, 620px);
+	min-height: clamp(320px, 55vh, 520px);
 	display: flex;
 	align-items: center;
 	overflow: hidden;
+}
+
+.hero-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 14px;
 }
 
 .hero-banner-media {
@@ -696,6 +703,21 @@ body.tourism-body {
 	background-size: cover;
 	background-position: center;
 	background-repeat: no-repeat;
+}
+
+.hero-content--primary {
+	max-width: 760px;
+}
+
+.hero-stats--glass article {
+	background: rgba(15, 23, 42, 0.36);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	backdrop-filter: blur(12px);
+}
+
+.hero-stats--compact {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
 }
 
 .hero-scroll-progress {
@@ -812,12 +834,13 @@ body[data-theme="dark"] .home-page .hero-handoff {
 	display: grid;
 	grid-template-columns: 1fr;
 	gap: 0;
-	align-items: center;
+	align-items: flex-start;
+	padding-top: 40px;
 }
 
 .hero-content--primary {
 	max-width: 720px;
-	padding: 0;
+	padding: 20px 0 0 0;
 }
 
 .hero-pill {
@@ -857,9 +880,9 @@ h1 {
 }
 
 .hero-content h1 {
-	font-size: clamp(2.15rem, 5.4vw, 3.45rem);
+	font-size: clamp(1.7rem, 4.2vw, 2.4rem);
 	font-weight: 700;
-	line-height: 1.04;
+	line-height: 1.08;
 	max-width: 15ch;
 	overflow-wrap: anywhere;
 	text-shadow: 0 18px 48px rgba(0, 0, 0, 0.52);
@@ -890,8 +913,8 @@ h1 {
 
 .hero-text {
 	max-width: 64ch;
-	font-size: clamp(0.98rem, 1.6vw, 1.1rem);
-	line-height: 1.74;
+	font-size: clamp(0.9rem, 1.4vw, 1rem);
+	line-height: 1.5;
 	color: rgba(255, 255, 255, 1);
 	font-weight: 500;
 }
@@ -900,7 +923,7 @@ h1 {
 	display: flex;
 	gap: 12px;
 	flex-wrap: wrap;
-	margin-top: 16px;
+	margin-top: 12px;
 }
 
 .hero-actions .btn {
@@ -917,22 +940,22 @@ h1 {
 }
 
 .hero-stats {
-	margin-top: 16px;
+	margin-top: 12px;
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 10px;
-	max-width: 620px;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+	max-width: 400px;
 }
 
 .hero-stats article {
-	padding: 10px 12px;
+	padding: 8px 10px;
 	border-radius: 12px;
 	border: 1px solid rgba(255, 255, 255, 0.18);
 	background: rgba(9, 19, 34, 0.28);
 	-webkit-backdrop-filter: blur(8px);
 	backdrop-filter: blur(8px);
 	display: grid;
-	gap: 3px;
+	gap: 2px;
 	transition: transform 0.28s ease, border-color 0.28s ease, background 0.28s ease;
 }
 
@@ -943,13 +966,13 @@ h1 {
 }
 
 .hero-stats strong {
-	font-size: 1.08rem;
+	font-size: 1rem;
 	line-height: 1;
 	color: #ffffff;
 }
 
 .hero-stats span {
-	font-size: 0.79rem;
+	font-size: 0.74rem;
 	color: rgba(255, 255, 255, 0.86);
 }
 
@@ -4569,13 +4592,10 @@ body[data-theme="dark"] .settings-card--danger {
 
 /* ========== TYPEWRITER EFFECT - CINEMATIC TEXT REVEAL ========== */
 
+/* Typewriter keyframe - cursor disabled */
 @keyframes typewriterCursor {
-	0%, 49% {
-		border-right: 2px solid currentColor;
-		opacity: 1;
-	}
-	50%, 100% {
-		border-right: 2px solid transparent;
+	0%, 49%, 50%, 100% {
+		border-right: none;
 		opacity: 0;
 	}
 }
@@ -4589,33 +4609,37 @@ body[data-theme="dark"] .settings-card--danger {
 	}
 }
 
-/* Typewriter text styling */
+/* Typewriter text styling - cursor completely disabled */
 .kicker[data-auto-animate="typewriter"],
 .hero-text[data-auto-animate="typewriter"],
 h1[data-auto-animate="typewriter"] {
 	display: inline-block;
 	max-width: 100%;
 	position: relative;
-	padding-right: 3px;
+	padding-right: 0;
 	font-family: inherit;
 	letter-spacing: inherit;
+	overflow: hidden;
+	word-break: break-word;
 }
 
-/* Show cursor while typing */
+/* Typewriter cursor completely disabled */
 [data-auto-animate="typewriter"].scroll-in::after {
-	content: '';
-	position: absolute;
-	right: 0;
-	bottom: 0;
-	height: 1.2em;
-	border-right: 2px solid currentColor;
-	animation: typewriterCursor 0.8s steps(2) infinite;
-	pointer-events: none;
+	display: none !important;
+	content: none !important;
+	visibility: hidden !important;
+	opacity: 0 !important;
+	width: 0 !important;
+	height: 0 !important;
 }
 
-/* Hide cursor after completion */
 [data-auto-animate="typewriter"].typewriter-complete::after {
-	animation: fadeOutCursor 0.3s ease-out forwards;
+	display: none !important;
+	content: none !important;
+	visibility: hidden !important;
+	opacity: 0 !important;
+	width: 0 !important;
+	height: 0 !important;
 }
 
 /* Auto-animate support for page load */
@@ -5509,6 +5533,10 @@ h1[data-auto-animate="typewriter"] {
 
 	.hero-section {
 		padding: 52px 0;
+	}
+
+	.hero-stats--compact {
+		grid-template-columns: 1fr;
 	}
 
 	.explore-filters {

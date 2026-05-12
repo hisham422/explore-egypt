@@ -1,7 +1,7 @@
 @extends('admin.layouts.app', [
     'title' => 'Admin | Attractions',
     'heading' => 'Attractions',
-    'subheading' => 'Manage attractions, activities, beaches, and coastal cities',
+    'subheading' => 'Manage attractions, activities, and beaches',
 ])
 
 @section('content')
